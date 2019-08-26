@@ -10,21 +10,27 @@ const getJSONString = obj => {
 }
 
 app.on("request",(req, res) => { //listen for requests
-	res.writeHead(httpStatus.OK, {
-		"Content-Type": "text/html"
-	}); //prepare a response
+	var body = [] // Create an array to hold chunk contents
+	req.on("data", (bodyData) => {  // process it in another callback function
+	  body.push(bodyData);  // add received data to body array
+	});
 
-        let responseMessage = "<h1>This will show on the screen.</h1>";
+	req.on("end", () => {  //run code when data transmission ends
+		body = Buffer.concat(body).toString(); //convert the body array to the string of text
+		console.log(`Request Body Contents: ${body}`);
+	                  
+	});// log request contents to console  
+        console.log(`Method:${getJSONString(req.method)}`); //log the http method used
+        console.log(`URL :${getJSONString(req.url)}`); //log the request url
+	console.log(`Headers:${getJSONString(req.headers)}`); //log request headers
+
+	res.writeHead(httpStatus.OK, {
+             "Content-Type": "text/html"
+	});
+        
+	let responseMessage = "<h1>This will show on the screen.</h1>";
 	res.end(responseMessage);
 
-        console.log(`Method:${getJSONString(req.method)}`); //log the http method used
-        console.log(req.url); //log the request url
-	console.log(req.headers); //log request headers
-
-
-
-});
-
-app.listen(port);
-console.log(`The server has started and listening on port number: ${port}`);
-
+       });
+       app.listen(port);
+       console.log(`The server has started ans is listening on port number: ${port} `);
